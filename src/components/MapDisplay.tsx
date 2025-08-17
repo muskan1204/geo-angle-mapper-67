@@ -74,7 +74,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
 
       console.log('Loading Google Maps script...');
       const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=geometry&callback=initGoogleMaps`;
+      script.src = `https://maps.gomaps.pro/maps/api/js?key=AlzaSyHJLNlWHLwvyZjacw-OXLOUb-u1Cvuewiz&libraries=geometry&callback=initGoogleMaps`;
       script.async = true;
       script.defer = true;
       
