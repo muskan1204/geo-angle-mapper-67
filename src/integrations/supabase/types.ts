@@ -14,88 +14,16 @@ export type Database = {
   }
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          created_at: string | null
-          email: string | null
-          full_name: string | null
-          id: string
-          updated_at: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          email?: string | null
-          full_name?: string | null
-          id: string
-          updated_at?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          email?: string | null
-          full_name?: string | null
-          id?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      subscriptions: {
-        Row: {
-          cancelled_at: string | null
-          created_at: string | null
-          current_period_end: string | null
-          current_period_start: string | null
-          expiry_date: string | null
-          id: string
-          razorpay_customer_id: string | null
-          razorpay_subscription_id: string | null
-          subscription_plan: Database["public"]["Enums"]["subscription_plan"]
-          subscription_status: Database["public"]["Enums"]["subscription_status"]
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          cancelled_at?: string | null
-          created_at?: string | null
-          current_period_end?: string | null
-          current_period_start?: string | null
-          expiry_date?: string | null
-          id?: string
-          razorpay_customer_id?: string | null
-          razorpay_subscription_id?: string | null
-          subscription_plan: Database["public"]["Enums"]["subscription_plan"]
-          subscription_status?: Database["public"]["Enums"]["subscription_status"]
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          cancelled_at?: string | null
-          created_at?: string | null
-          current_period_end?: string | null
-          current_period_start?: string | null
-          expiry_date?: string | null
-          id?: string
-          razorpay_customer_id?: string | null
-          razorpay_subscription_id?: string | null
-          subscription_plan?: Database["public"]["Enums"]["subscription_plan"]
-          subscription_status?: Database["public"]["Enums"]["subscription_status"]
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      has_active_subscription: {
-        Args: { user_uuid: string }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
-      subscription_plan: "monthly" | "yearly"
-      subscription_status: "active" | "cancelled" | "expired" | "pending"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -222,9 +150,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      subscription_plan: ["monthly", "yearly"],
-      subscription_status: ["active", "cancelled", "expired", "pending"],
-    },
+    Enums: {},
   },
 } as const
