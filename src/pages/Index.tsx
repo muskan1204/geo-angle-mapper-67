@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
@@ -6,7 +8,7 @@ import CoordinateInput from '@/components/CoordinateInput';
 import MapDisplay from '@/components/MapDisplay';
 import MeasurementsList from '@/components/MeasurementsList';
 import { calculateBearing, calculateDistance, Point } from '@/utils/bearing';
-import { MapPin, Crosshair } from 'lucide-react';
+import { MapPin, Crosshair, LogOut, Crown } from 'lucide-react';
 
 interface MapMarker {
   id: string;
@@ -24,11 +26,76 @@ interface MapLine {
 }
 
 const Index = () => {
+  const navigate = useNavigate();
   const [mapCenter, setMapCenter] = useState({ lat: 28.8789, lng: 77.1258 }); // Default to Delhi
   const [markers, setMarkers] = useState<MapMarker[]>([]);
   const [lines, setLines] = useState<MapLine[]>([]);
   const [selectedMarkers, setSelectedMarkers] = useState<string[]>([]);
   const [showInput, setShowInput] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    checkAuthAndSubscription();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!session) {
+          navigate('/auth');
+        } else {
+          setUser(session.user);
+          checkSubscription(session.user.id);
+        }
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
+
+  const checkAuthAndSubscription = async () => {
+    setLoading(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      navigate('/auth');
+      return;
+    }
+
+    setUser(session.user);
+    await checkSubscription(session.user.id);
+    setLoading(false);
+  };
+
+  const checkSubscription = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('subscription_status', 'active')
+        .gte('expiry_date', new Date().toISOString())
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      
+      setHasActiveSubscription(!!data);
+      
+      if (!data) {
+        navigate('/subscription');
+      }
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+      navigate('/subscription');
+    }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth');
+  };
 
   const handleLocationSet = (lat: number, lng: number) => {
     setMapCenter({ lat, lng });
@@ -105,6 +172,18 @@ const Index = () => {
     });
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (!hasActiveSubscription) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -122,6 +201,22 @@ const Index = () => {
             </div>
             
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/subscription')}
+              >
+                <Crown className="mr-2 h-4 w-4" />
+                Subscription
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSignOut}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
+              </Button>
               {selectedMarkers.length === 2 && (() => {
                 const m1 = markers.find(m => m.id === selectedMarkers[0]);
                 const m2 = markers.find(m => m.id === selectedMarkers[1]);
