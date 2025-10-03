@@ -74,7 +74,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
 
       console.log('Loading Google Maps script...');
       const script = document.createElement('script');
-      script.src = `https://maps.gomaps.pro/maps/api/js?key=AlzaSyiM8OYCyljsYjuky803NNye7gppnFGdYxO&libraries=geometry&callback=initGoogleMaps`;
+      script.src = `https://maps.gomaps.pro/maps/api/js?key=AlzaSyHJLNlWHLwvyZjacw-OXLOUb-u1Cvuewiz&libraries=geometry&callback=initGoogleMaps`;
       script.async = true;
       script.defer = true;
       
@@ -137,6 +137,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
             };
             
             // Show yellow location pin with coordinates
+            console.log('Setting location pin at:', position);
             setLocationPin({
               position,
               coordinates: toDMS(position.lat, position.lng)
@@ -326,18 +327,19 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
 
     // Add new location pin if exists
     if (locationPin) {
-      // Create yellow pin similar to Google Earth Pro
+      console.log('Creating yellow location pin at:', locationPin.position);
+      
+      // Create yellow pin similar to Google Earth Pro - using simpler circle icon
       locationPinRef.current = new google.maps.Marker({
         position: locationPin.position,
         map: mapInstanceRef.current,
         icon: {
-          path: 'M 0,0 C -2,-20 -10,-22 -10,-30 A 10,10 0 1,1 10,-30 C 10,-22 2,-20 0,0 z',
+          path: google.maps.SymbolPath.CIRCLE,
+          scale: 15,
           fillColor: '#FFD700', // Golden yellow
-          fillOpacity: 0.9,
+          fillOpacity: 1,
           strokeColor: '#000000',
-          strokeWeight: 1,
-          scale: 1.5,
-          anchor: new google.maps.Point(0, 0),
+          strokeWeight: 2,
         },
         title: locationPin.coordinates,
         zIndex: 1000
