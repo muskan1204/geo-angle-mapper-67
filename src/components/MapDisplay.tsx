@@ -67,14 +67,14 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
       }
 
       // Remove any existing script
-      const existingScript = document.querySelector('script[src*="maps.gomaps.pro"]');
+      const existingScript = document.querySelector('script[src*="maps.googleapis.com"]');
       if (existingScript) {
         existingScript.remove();
       }
 
       console.log('Loading Google Maps script...');
       const script = document.createElement('script');
-      script.src = `https://maps.gomaps.pro/maps/api/js?key=AlzaSyHJLNlWHLwvyZjacw-OXLOUb-u1Cvuewiz&libraries=geometry&callback=initGoogleMaps`;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=AIzaSyBDpdXAjE9nWC3LFTbJajldkACIQJhYMW0&libraries=geometry&callback=initGoogleMaps`;
       script.async = true;
       script.defer = true;
       
