@@ -50,6 +50,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
   const bearingInfoRef = useRef<google.maps.InfoWindow | null>(null);
   const locationPinRef = useRef<google.maps.Marker | null>(null);
   const locationInfoRef = useRef<google.maps.InfoWindow | null>(null);
+  const centerMarkerRef = useRef<google.maps.Marker | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [locationPin, setLocationPin] = useState<LocationPin | null>(null);
@@ -167,11 +168,33 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
     };
   }, []);
 
-  // Update map center when center prop changes
+  // Update map center when center prop changes and add red center marker
   useEffect(() => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setCenter(center);
       mapInstanceRef.current.setZoom(18);
+      
+      // Remove existing center marker
+      if (centerMarkerRef.current) {
+        centerMarkerRef.current.setMap(null);
+      }
+      
+      // Create red center marker (like Google Maps pin)
+      centerMarkerRef.current = new google.maps.Marker({
+        position: center,
+        map: mapInstanceRef.current,
+        icon: {
+          path: 'M 0,0 C -2,-20 -10,-22 -10,-30 A 10,10 0 1,1 10,-30 C 10,-22 2,-20 0,0 z',
+          fillColor: '#EA4335',
+          fillOpacity: 1,
+          strokeColor: '#FFFFFF',
+          strokeWeight: 2,
+          scale: 1.5,
+          anchor: new google.maps.Point(0, 0),
+        },
+        title: 'Center Position',
+        zIndex: 999,
+      });
     }
   }, [center]);
 
