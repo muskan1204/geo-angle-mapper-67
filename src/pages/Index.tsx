@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
-import CoordinateInput from '@/components/CoordinateInput';
+import LocationSearchBox from '@/components/LocationSearchBox';
 import MapDisplay from '@/components/MapDisplay';
 import MeasurementsList from '@/components/MeasurementsList';
 import { calculateBearing, calculateDistance, Point } from '@/utils/bearing';
-import { MapPin, Crosshair } from 'lucide-react';
+import { MapPin, Crosshair, X } from 'lucide-react';
 
 interface MapMarker {
   id: string;
@@ -154,7 +154,6 @@ const Index = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-140px)]">
           {/* Left Sidebar - Controls */}
           <div className="lg:col-span-1 space-y-6 overflow-y-auto">
-            <CoordinateInput onLocationSet={handleLocationSet} />
             <MeasurementsList 
               lines={lines}
               onReset={handleReset}
@@ -165,6 +164,19 @@ const Index = () => {
 
           {/* Main Map Area */}
           <div className="lg:col-span-3 relative">
+            {/* Search Box Above Map */}
+            {showInput && (
+              <div className="absolute top-4 left-4 right-4 z-20">
+                <LocationSearchBox 
+                  onLocationSet={(lat, lng) => { 
+                    handleLocationSet(lat, lng); 
+                    setShowInput(false); 
+                  }} 
+                  onClose={() => setShowInput(false)}
+                />
+              </div>
+            )}
+
             <MapDisplay
               center={mapCenter}
               markers={markers}
@@ -174,24 +186,23 @@ const Index = () => {
               selectedMarkers={selectedMarkers}
               onMarkerSelect={handleMarkerSelect}
             />
-            <div className="absolute top-4 right-4 z-10 flex flex-col items-end gap-2">
-              <Button variant="secondary" size="sm" onClick={() => setShowInput(v => !v)} className="bg-card/80 backdrop-blur border">
-                <MapPin className="mr-2 h-4 w-4" />
-                Coordinates
-              </Button>
-              {showInput && (
-                <div className="w-[340px]">
-                  <CoordinateInput onLocationSet={(lat, lng) => { handleLocationSet(lat, lng); setShowInput(false); }} />
-                </div>
-              )}
-            </div>
             
-            {/* Map Instructions Overlay */}
+            {/* Map Instructions Overlay with Search Button */}
             {markers.length === 0 && (
-              <div className="absolute top-4 left-4 right-4 bg-card/95 backdrop-blur-sm border rounded-lg p-4 shadow-lg">
-                <h3 className="font-medium mb-2">Getting Started</h3>
+              <div className="absolute top-4 left-4 right-4 bg-card/95 backdrop-blur-sm border rounded-lg p-4 shadow-lg z-10">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-medium">Getting Started</h3>
+                  <Button
+                    size="sm"
+                    onClick={() => setShowInput(true)}
+                    className="bg-map-primary hover:bg-map-primary/90 text-white"
+                  >
+                    <MapPin className="mr-2 h-4 w-4" />
+                    Search Location
+                  </Button>
+                </div>
                 <ol className="text-sm text-muted-foreground space-y-1">
-                  <li>1. Enter coordinates in DMS format to center the map</li>
+                  <li>1. Search for a location or enter coordinates</li>
                   <li>2. Click on the map to place markers at wall corners</li>
                   <li>3. Select two markers to measure wall bearing</li>
                 </ol>
