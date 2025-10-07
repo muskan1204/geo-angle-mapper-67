@@ -6,7 +6,7 @@ import LocationSearchBox from '@/components/LocationSearchBox';
 import MapDisplay from '@/components/MapDisplay';
 import MeasurementsList from '@/components/MeasurementsList';
 import { calculateBearing, calculateDistance, Point } from '@/utils/bearing';
-import { MapPin, Crosshair } from 'lucide-react';
+import { MapPin, Crosshair, X } from 'lucide-react';
 
 interface MapMarker {
   id: string;
@@ -28,6 +28,7 @@ const Index = () => {
   const [markers, setMarkers] = useState<MapMarker[]>([]);
   const [lines, setLines] = useState<MapLine[]>([]);
   const [selectedMarkers, setSelectedMarkers] = useState<string[]>([]);
+  const [showGettingStarted, setShowGettingStarted] = useState(true);
 
   const handleLocationSet = (lat: number, lng: number) => {
     setMapCenter({ lat, lng });
@@ -161,8 +162,8 @@ const Index = () => {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-140px)]">
-          {/* Left Sidebar - Controls */}
-          <div className="lg:col-span-1 space-y-6 overflow-y-auto">
+          {/* Left Sidebar - Controls - Hidden on mobile, shown on desktop */}
+          <div className="hidden lg:block lg:col-span-1 space-y-6 overflow-y-auto">
             <MeasurementsList 
               lines={lines}
               onReset={handleReset}
@@ -184,9 +185,19 @@ const Index = () => {
             />
             
             {/* Map Instructions Overlay */}
-            {markers.length === 0 && (
+            {markers.length === 0 && showGettingStarted && (
               <div className="absolute top-4 left-4 right-4 bg-card/95 backdrop-blur-sm border rounded-lg p-4 shadow-lg z-10">
-                <h3 className="font-medium mb-2">Getting Started</h3>
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-medium">Getting Started</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowGettingStarted(false)}
+                    className="h-6 w-6 p-0 -mt-1 -mr-1"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
                 <ol className="text-sm text-muted-foreground space-y-1">
                   <li>1. Search for a location or enter coordinates</li>
                   <li>2. Click on the map to place markers at wall corners</li>
@@ -194,6 +205,16 @@ const Index = () => {
                 </ol>
               </div>
             )}
+          </div>
+
+          {/* Mobile Measurements Section - Below map on mobile */}
+          <div className="lg:hidden col-span-1">
+            <MeasurementsList 
+              lines={lines}
+              onReset={handleReset}
+              selectedMarkers={selectedMarkers}
+              markerCount={markers.length}
+            />
           </div>
         </div>
       </div>
