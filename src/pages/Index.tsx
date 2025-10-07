@@ -6,7 +6,7 @@ import LocationSearchBox from '@/components/LocationSearchBox';
 import MapDisplay from '@/components/MapDisplay';
 import MeasurementsList from '@/components/MeasurementsList';
 import { calculateBearing, calculateDistance, Point } from '@/utils/bearing';
-import { MapPin, Crosshair, X } from 'lucide-react';
+import { MapPin, Crosshair } from 'lucide-react';
 
 interface MapMarker {
   id: string;
@@ -28,7 +28,6 @@ const Index = () => {
   const [markers, setMarkers] = useState<MapMarker[]>([]);
   const [lines, setLines] = useState<MapLine[]>([]);
   const [selectedMarkers, setSelectedMarkers] = useState<string[]>([]);
-  const [showInput, setShowInput] = useState(false);
 
   const handleLocationSet = (lat: number, lng: number) => {
     setMapCenter({ lat, lng });
@@ -149,6 +148,16 @@ const Index = () => {
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="border-b bg-card/30 backdrop-blur-sm sticky top-[73px] z-10">
+        <div className="container mx-auto px-4 py-3">
+          <LocationSearchBox 
+            onLocationSet={handleLocationSet}
+            onClose={() => {}}
+          />
+        </div>
+      </div>
+
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-140px)]">
@@ -164,19 +173,6 @@ const Index = () => {
 
           {/* Main Map Area */}
           <div className="lg:col-span-3 relative">
-            {/* Search Box Above Map */}
-            {showInput && (
-              <div className="absolute top-4 left-4 right-4 z-20">
-                <LocationSearchBox 
-                  onLocationSet={(lat, lng) => { 
-                    handleLocationSet(lat, lng); 
-                    setShowInput(false); 
-                  }} 
-                  onClose={() => setShowInput(false)}
-                />
-              </div>
-            )}
-
             <MapDisplay
               center={mapCenter}
               markers={markers}
@@ -187,20 +183,10 @@ const Index = () => {
               onMarkerSelect={handleMarkerSelect}
             />
             
-            {/* Map Instructions Overlay with Search Button */}
+            {/* Map Instructions Overlay */}
             {markers.length === 0 && (
               <div className="absolute top-4 left-4 right-4 bg-card/95 backdrop-blur-sm border rounded-lg p-4 shadow-lg z-10">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-medium">Getting Started</h3>
-                  <Button
-                    size="sm"
-                    onClick={() => setShowInput(true)}
-                    className="bg-map-primary hover:bg-map-primary/90 text-white"
-                  >
-                    <MapPin className="mr-2 h-4 w-4" />
-                    Search Location
-                  </Button>
-                </div>
+                <h3 className="font-medium mb-2">Getting Started</h3>
                 <ol className="text-sm text-muted-foreground space-y-1">
                   <li>1. Search for a location or enter coordinates</li>
                   <li>2. Click on the map to place markers at wall corners</li>

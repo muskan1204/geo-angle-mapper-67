@@ -119,68 +119,48 @@ const LocationSearchBox: React.FC<LocationSearchBoxProps> = ({ onLocationSet, on
   };
 
   return (
-    <div className="bg-card border rounded-lg shadow-lg p-4 backdrop-blur-sm">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="font-medium flex items-center gap-2">
-          <Search className="h-4 w-4 text-map-primary" />
-          Search Location
-        </h3>
+    <div className="relative">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search address, coordinates, or lat/lng..."
+          value={input}
+          onChange={(e) => handleInputChange(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          className="pl-10 pr-20"
+        />
         <Button
-          variant="ghost"
           size="sm"
-          onClick={onClose}
-          className="h-6 w-6 p-0"
+          onClick={() => handleSearch()}
+          disabled={isSearching || !input.trim()}
+          className="absolute right-1 top-1/2 -translate-y-1/2 h-8 px-3 bg-map-primary hover:bg-map-primary/90 text-white"
         >
-          <X className="h-4 w-4" />
+          {isSearching ? '...' : <MapPin className="h-4 w-4" />}
         </Button>
       </div>
-      
-      <div className="space-y-2">
-        <div className="relative">
-          <Input
-            placeholder="Search address or enter coordinates..."
-            value={input}
-            onChange={(e) => handleInputChange(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            className="pr-10"
-          />
-          <Button
-            size="sm"
-            onClick={() => handleSearch()}
-            disabled={isSearching || !input.trim()}
-            className="absolute right-1 top-1 h-8 px-3 bg-map-primary hover:bg-map-primary/90 text-white"
-          >
-            {isSearching ? '...' : <MapPin className="h-4 w-4" />}
-          </Button>
-        </div>
 
-        {/* Autocomplete dropdown */}
-        {predictions.length > 0 && (
-          <div className="bg-background border rounded-md shadow-lg max-h-60 overflow-y-auto z-50">
-            {predictions.map((prediction) => (
-              <button
-                key={prediction.place_id}
-                onClick={() => handlePredictionClick(prediction)}
-                className="w-full text-left px-3 py-2 hover:bg-accent transition-colors text-sm border-b last:border-b-0"
-              >
-                <div className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                  <div>
-                    <div className="font-medium">{prediction.structured_formatting.main_text}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {prediction.structured_formatting.secondary_text}
-                    </div>
+      {/* Autocomplete dropdown */}
+      {predictions.length > 0 && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-card border rounded-md shadow-lg max-h-60 overflow-y-auto z-50">
+          {predictions.map((prediction) => (
+            <button
+              key={prediction.place_id}
+              onClick={() => handlePredictionClick(prediction)}
+              className="w-full text-left px-3 py-2 hover:bg-accent transition-colors text-sm border-b last:border-b-0"
+            >
+              <div className="flex items-start gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <div>
+                  <div className="font-medium">{prediction.structured_formatting.main_text}</div>
+                  <div className="text-xs text-muted-foreground">
+                    {prediction.structured_formatting.secondary_text}
                   </div>
                 </div>
-              </button>
-            ))}
-          </div>
-        )}
-
-        <p className="text-xs text-muted-foreground">
-          Enter an address, place name, or DMS coordinates (e.g., 28°52'43.1"N 77°07'34.0"E)
-        </p>
-      </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
