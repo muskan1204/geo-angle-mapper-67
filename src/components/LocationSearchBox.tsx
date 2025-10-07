@@ -18,11 +18,19 @@ const LocationSearchBox: React.FC<LocationSearchBoxProps> = ({ onLocationSet, on
   const placesService = useRef<google.maps.places.PlacesService | null>(null);
 
   useEffect(() => {
-    if (window.google) {
-      autocompleteService.current = new google.maps.places.AutocompleteService();
-      const div = document.createElement('div');
-      placesService.current = new google.maps.places.PlacesService(div);
-    }
+    // Wait for Google Maps API to load
+    const initializeServices = () => {
+      if (window.google && window.google.maps && window.google.maps.places) {
+        autocompleteService.current = new google.maps.places.AutocompleteService();
+        const div = document.createElement('div');
+        placesService.current = new google.maps.places.PlacesService(div);
+      } else {
+        // Retry after a short delay if not loaded yet
+        setTimeout(initializeServices, 100);
+      }
+    };
+    
+    initializeServices();
   }, []);
 
   const handleInputChange = (value: string) => {
@@ -62,6 +70,16 @@ const LocationSearchBox: React.FC<LocationSearchBoxProps> = ({ onLocationSet, on
 
     // If not DMS, try geocoding as address
     if (searchTerm.trim()) {
+      // Check if Google Maps is loaded
+      if (!window.google || !window.google.maps) {
+        toast({
+          title: "Loading Maps",
+          description: "Please wait for Google Maps to load...",
+          variant: "destructive"
+        });
+        return;
+      }
+
       setIsSearching(true);
       try {
         const geocoder = new google.maps.Geocoder();
