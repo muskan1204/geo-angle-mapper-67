@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { calculateBearing, Point } from '@/utils/bearing';
-import { toDMS } from '@/utils/coordinates';
 
 interface MapMarker {
   id: string;
@@ -18,10 +17,6 @@ interface MapLine {
   label: string;
 }
 
-interface LocationPin {
-  position: { lat: number; lng: number };
-  coordinates: string;
-}
 
 interface MapDisplayProps {
   center: { lat: number; lng: number };
@@ -48,12 +43,9 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
   const linesRef = useRef<Map<string, google.maps.Polyline>>(new Map());
   const selectedLineRef = useRef<google.maps.Polyline | null>(null);
   const bearingInfoRef = useRef<google.maps.InfoWindow | null>(null);
-  const locationPinRef = useRef<google.maps.Marker | null>(null);
-  const locationInfoRef = useRef<google.maps.InfoWindow | null>(null);
   const centerMarkerRef = useRef<google.maps.Marker | null>(null);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [locationPin, setLocationPin] = useState<LocationPin | null>(null);
 
   useEffect(() => {
     let retryCount = 0;
@@ -129,19 +121,13 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
         setLoadError(null);
         console.log('Map initialized successfully');
 
-        // Add click listener for adding markers and location pin
+        // Add click listener for adding markers
         map.addListener('click', (event: google.maps.MapMouseEvent) => {
           if (event.latLng) {
             const position = {
               lat: event.latLng.lat(),
               lng: event.latLng.lng()
             };
-            
-            // Show yellow location pin with coordinates
-            setLocationPin({
-              position,
-              coordinates: toDMS(position.lat, position.lng)
-            });
             
             const newMarker: MapMarker = {
               id: `marker-${Date.now()}`,
@@ -332,74 +318,6 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
       }
     }
   }, [selectedMarkers, markers, isMapLoaded]);
-
-  // Yellow location pin display
-  useEffect(() => {
-    if (!isMapLoaded || !mapInstanceRef.current) return;
-
-    // Clear existing location pin
-    if (locationPinRef.current) {
-      locationPinRef.current.setMap(null);
-      locationPinRef.current = null;
-    }
-    if (locationInfoRef.current) {
-      locationInfoRef.current.close();
-      locationInfoRef.current = null;
-    }
-
-    // Add new location pin if exists
-    if (locationPin) {
-      // Create yellow pin similar to Google Earth Pro
-      locationPinRef.current = new google.maps.Marker({
-        position: locationPin.position,
-        map: mapInstanceRef.current,
-        icon: {
-          path: 'M 0,0 C -2,-20 -10,-22 -10,-30 A 10,10 0 1,1 10,-30 C 10,-22 2,-20 0,0 z',
-          fillColor: '#FFD700', // Golden yellow
-          fillOpacity: 0.9,
-          strokeColor: '#000000',
-          strokeWeight: 1,
-          scale: 1.5,
-          anchor: new google.maps.Point(0, 0),
-        },
-        title: locationPin.coordinates,
-        zIndex: 1000
-      });
-
-      // Show coordinates info window
-      const content = `
-        <div style="
-          padding: 8px 12px;
-          background: #FFD700;
-          color: #000000;
-          font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-          font-size: 12px;
-          font-weight: 600;
-          border-radius: 6px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-          border: 1px solid #000000;
-          white-space: nowrap;
-        ">
-          📍 ${locationPin.coordinates}
-        </div>
-      `;
-
-      locationInfoRef.current = new google.maps.InfoWindow({
-        content,
-        position: locationPin.position,
-        disableAutoPan: false,
-      });
-
-      locationInfoRef.current.open({ map: mapInstanceRef.current });
-
-      // Auto-hide after 5 seconds
-      setTimeout(() => {
-        if (locationInfoRef.current) {
-          locationInfoRef.current.close();
-        }
-      }, 5000);
-    }
-  }, [locationPin, isMapLoaded]);
 
   return (
     <Card className="w-full h-full overflow-hidden relative">
