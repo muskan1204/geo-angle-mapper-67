@@ -109,7 +109,8 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
         const map = new google.maps.Map(mapRef.current, {
           center,
           zoom: 18,
-          maxZoom: 22,
+          maxZoom: 24,
+          gestureHandling: 'greedy',
           mapTypeId: 'satellite',
           mapTypeControl: true,
           streetViewControl: false,
@@ -159,7 +160,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
   useEffect(() => {
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setCenter(center);
-      mapInstanceRef.current.setZoom(18);
+      // Do not reset zoom on center changes to avoid interfering with user zoom
       
       // Remove existing center marker
       if (centerMarkerRef.current) {
