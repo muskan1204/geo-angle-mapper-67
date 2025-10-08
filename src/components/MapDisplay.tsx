@@ -109,6 +109,7 @@ const MapDisplay: React.FC<MapDisplayProps> = ({
         const map = new google.maps.Map(mapRef.current, {
           center,
           zoom: 18,
+          maxZoom: 22,
           mapTypeId: 'satellite',
           mapTypeControl: true,
           streetViewControl: false,
